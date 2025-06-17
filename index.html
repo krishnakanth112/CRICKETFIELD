@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricketField Local Match Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+        }
+        .font-oswald { font-family: 'Oswald', sans-serif; }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #34d399; /* emerald-400 */
+            transition: width 0.3s ease-in-out;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .nav-link.active {
+            color: #34d399; /* emerald-400 */
+        }
+
+        .form-input, .form-select {
+            @apply w-full px-4 py-2 text-white bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all;
+        }
+        .btn {
+            @apply px-6 py-2.5 font-bold text-white rounded-lg transition-all transform hover:scale-105 shadow-lg w-full sm:w-auto;
+        }
+        .btn-primary { @apply bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/30; }
+        .btn-secondary { @apply bg-sky-600 hover:bg-sky-500 shadow-sky-500/30; }
+        .btn-danger { @apply bg-red-600 hover:bg-red-500 shadow-red-500/30; }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .player-row input::-webkit-outer-spin-button,
+        .player-row input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .player-row input { -moz-appearance: textfield; }
+        
+        .card {
+            background-color: rgba(30, 41, 59, 0.8); /* slate-800 with opacity */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5); /* slate-700 with opacity */
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/80 backdrop-blur-sm shadow-2xl sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl sm:text-3xl font-oswald font-bold text-white tracking-wider uppercase">
+                    CRICKET<span class="text-emerald-400">FIELD</span>
+                </h1>
+                <nav class="hidden md:flex space-x-8 text-slate-300 font-semibold items-center text-sm uppercase">
+                    <a onclick="showSection('home')" class="nav-link active">Home</a>
+                    <a onclick="showSection('create-match')" class="nav-link">Create Match</a>
+                    <a onclick="showSection('view-prediction')" class="nav-link">View Result</a>
+                    <a onclick="showSection('contact')" class="nav-link">Contact</a>
+                </nav>
+                <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-slate-800 border-t border-slate-700">
+            <a onclick="showSection('home', true)" class="block text-white py-3 px-4 hover:bg-emerald-600 transition-colors">Home</a>
+            <a onclick="showSection('create-match', true)" class="block text-white py-3 px-4 hover:bg-emerald-600 transition-colors">Create Match</a>
+            <a onclick="showSection('view-prediction', true)" class="block text-white py-3 px-4 hover:bg-emerald-600 transition-colors">View Result</a>
+            <a onclick="showSection('contact', true)" class="block text-white py-3 px-4 hover:bg-emerald-600 transition-colors">Contact</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="bg-cover bg-center rounded-xl p-8 md:p-16 text-center shadow-2xl" style="background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1629285483773-63143439b70b?q=80&w=1932&auto=format&fit=crop')">
+                <h2 class="text-4xl md:text-6xl font-oswald font-bold text-white mb-4 uppercase tracking-wide">The Ultimate Cricket Scorer</h2>
+                <p class="text-lg text-slate-300 max-w-2xl mx-auto mb-8">Manually score your local matches, calculate strike rates on the fly, and instantly see the winner. Professional-level stats for your gully cricket.</p>
+                <button onclick="showSection('create-match')" class="btn btn-primary font-oswald tracking-wider text-lg">Start a New Match</button>
+            </div>
+        </section>
+
+        <!-- Create Match Section -->
+        <section id="create-match" class="section">
+             <div class="card p-6 sm:p-8 rounded-xl shadow-2xl">
+                <h2 class="text-3xl sm:text-4xl font-oswald font-bold text-white mb-8 border-b-2 border-slate-700 pb-4 uppercase">Setup Your Match</h2>
+
+                <div class="grid md:grid-cols-2 gap-x-8 gap-y-6 mb-10">
+                    <div>
+                        <label for="myTeamName" class="block text-sm font-semibold text-slate-400 mb-2">Your Team Name</label>
+                        <input type="text" id="myTeamName" class="form-input" placeholder="E.g., Local Legends">
+                    </div>
+                    <div>
+                        <label for="opponentTeamName" class="block text-sm font-semibold text-slate-400 mb-2">Opponent's Team Name</label>
+                        <input type="text" id="opponentTeamName" class="form-input" placeholder="E.g., City Challengers">
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="flex flex-col">
+                        <h3 id="myTeamSectionHeader" class="text-2xl font-oswald font-semibold text-white mb-4 uppercase">My Team Roster</h3>
+                        <div id="myTeamPlayers" class="space-y-4 flex-grow"></div>
+                        <div class="mt-4"><button onclick="addPlayer('myTeam')" class="btn btn-secondary text-sm">Add Player</button></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 id="opponentTeamSectionHeader" class="text-2xl font-oswald font-semibold text-white mb-4 uppercase">Opponent Roster</h3>
+                        <div id="opponentTeamPlayers" class="space-y-4 flex-grow"></div>
+                        <div class="mt-4"><button onclick="addPlayer('opponentTeam')" class="btn btn-secondary text-sm">Add Player</button></div>
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-6 border-t-2 border-slate-700 flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <button onclick="generateResult()" class="btn btn-primary font-oswald text-xl tracking-wider">Calculate Winner</button>
+                    <button onclick="saveMatchData()" class="btn btn-secondary">Save Data</button>
+                    <button onclick="clearAllData()" class="btn btn-danger">Clear All</button>
+                </div>
+             </div>
+        </section>
+
+        <!-- View Prediction Section -->
+        <section id="view-prediction" class="section">
+            <div class="card p-6 sm:p-8 rounded-xl shadow-2xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b-2 border-slate-700 pb-4">
+                    <h2 class="text-4xl font-oswald font-bold text-white uppercase">Match Result</h2>
+                    <button id="downloadCsvBtn" onclick="downloadCSV()" class="btn btn-primary mt-4 sm:mt-0 text-sm">Download CSV</button>
+                </div>
+
+                <div id="winnerResult" class="hidden text-center bg-gradient-to-br from-emerald-500 to-green-600 border-2 border-emerald-400 text-white p-6 rounded-lg mb-8 shadow-2xl">
+                    <h3 class="text-5xl font-oswald font-bold uppercase tracking-widest" id="winnerText"></h3>
+                    <p class="font-semibold text-emerald-100 mt-2" id="winnerReason"></p>
+                </div>
+                 <div id="predictionError" class="hidden text-center bg-red-900/50 border-2 border-red-500 text-red-300 p-4 rounded-md mb-8">
+                    <p class="font-bold text-lg">No data found!</p>
+                    <p class="text-sm">Please create a match and enter player stats first.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-3xl font-oswald font-semibold text-white mb-4 uppercase" id="myTeamResultHeader">My Team Stats</h3>
+                        <div class="overflow-x-auto card rounded-lg p-2">
+                            <table class="min-w-full text-sm">
+                                <thead class="border-b-2 border-slate-600">
+                                    <tr>
+                                        <th class="py-2 px-3 text-left font-semibold uppercase text-slate-400">Player</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">Dismissal</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">Runs</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">Balls</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">SR</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTeamResultBody" class="divide-y divide-slate-700"></tbody>
+                            </table>
+                        </div>
+                         <div id="myTeamTotals" class="mt-4 font-bold text-right pr-2 text-lg"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-oswald font-semibold text-white mb-4 uppercase" id="opponentTeamResultHeader">Opponent Team Stats</h3>
+                         <div class="overflow-x-auto card rounded-lg p-2">
+                            <table class="min-w-full text-sm">
+                                <thead class="border-b-2 border-slate-600">
+                                    <tr>
+                                        <th class="py-2 px-3 text-left font-semibold uppercase text-slate-400">Player</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">Dismissal</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">Runs</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">Balls</th>
+                                        <th class="py-2 px-3 text-center font-semibold uppercase text-slate-400">SR</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="opponentTeamResultBody" class="divide-y divide-slate-700"></tbody>
+                            </table>
+                        </div>
+                        <div id="opponentTeamTotals" class="mt-4 font-bold text-right pr-2 text-lg"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <div class="card p-8 rounded-xl shadow-xl text-center">
+                <h2 class="text-5xl font-oswald font-bold text-white mb-4 uppercase">Get In Touch</h2>
+                <p class="text-lg text-slate-300 mb-6">Feedback, questions, or feature requests? Reach out.</p>
+                <div class="text-slate-300 text-lg space-y-2">
+                    <p><strong>Email:</strong> contact@cricketfield.dev</p>
+                    <p><strong>Twitter:</strong> @CFPredictor</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="text-center py-6 mt-8 border-t border-slate-800">
+        <p class="text-slate-500 text-sm">&copy; 2024 CricketField Predictor. All Rights Reserved.</p>
+        <p class="text-slate-600 text-xs mt-1">Designed & Developed by Krishnakanth & Sai Kiran</p>
+    </footer>
+
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-lg opacity-0 translate-y-3 transition-all duration-300">
+        <p id="toast-message"></p>
+    </div>
+
+<script>
+    // --- Navigation ---
+    const sections = document.querySelectorAll('.section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+    
+    function showSection(sectionId, fromMobile = false) {
+        sections.forEach(section => section.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('onclick').includes(`'${sectionId}'`)) {
+                link.classList.add('active');
+            }
+        });
+
+        if (sectionId === 'view-prediction') displayResults();
+        if (fromMobile) mobileMenu.classList.add('hidden');
+        window.scrollTo(0, 0);
+    }
+    
+    // --- Toast Notification ---
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+
+    function showToast(message, duration = 3000) {
+        toastMessage.textContent = message;
+        toast.classList.remove('opacity-0', 'translate-y-3');
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-3');
+        }, duration);
+    }
+
+    // --- Player Management ---
+    const myTeamPlayersContainer = document.getElementById('myTeamPlayers');
+    const opponentTeamPlayersContainer = document.getElementById('opponentTeamPlayers');
+
+    function addPlayer(teamType, player = { name: '', runs: '', balls: '', dismissal: 'Not Out' }) {
+        const container = teamType === 'myTeam' ? myTeamPlayersContainer : opponentTeamPlayersContainer;
+        if (container.children.length >= 11) {
+            showToast('Maximum of 11 players allowed.');
+            return;
+        }
+        const playerIndex = container.children.length + 1;
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player-row bg-slate-900/50 p-3 rounded-lg space-y-3';
+        playerDiv.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" value="${player.name}" class="form-input" placeholder="Player ${playerIndex} Name">
+                <select class="form-select dismissal-select">
+                    <option>Not Out</option>
+                    <option>Bowled</option>
+                    <option>Caught</option>
+                    <option>LBW</option>
+                    <option>Run Out</option>
+                    <option>Stumped</option>
+                    <option>Hit Wicket</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-4 gap-2 items-center">
+                <input type="number" value="${player.runs}" class="form-input text-center" placeholder="R" oninput="updateStrikeRate(this)">
+                <input type="number" value="${player.balls}" class="form-input text-center" placeholder="B" oninput="updateStrikeRate(this)">
+                <span class="strike-rate-display font-medium text-emerald-400 text-sm text-center">0.0</span>
+                <button onclick="removePlayer(this)" class="bg-red-600 hover:bg-red-500 rounded-md p-2 text-white transition-colors h-full flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        `;
+        
+        playerDiv.querySelector('.dismissal-select').value = player.dismissal;
+        container.appendChild(playerDiv);
+        updateStrikeRate(playerDiv.querySelector('input[placeholder="R"]'));
+    }
+    
+    function removePlayer(button) {
+        const playerDiv = button.closest('.player-row');
+        const container = playerDiv.parentElement;
+        if (container.children.length <= 5) {
+             showToast('Minimum of 5 players required.');
+             return;
+        }
+        playerDiv.remove();
+    }
+    
+    function updateStrikeRate(inputElement) {
+        const playerRow = inputElement.closest('.player-row');
+        const runs = parseInt(playerRow.querySelector('input[placeholder="R"]').value) || 0;
+        const balls = parseInt(playerRow.querySelector('input[placeholder="B"]').value) || 0;
+        const srDisplay = playerRow.querySelector('.strike-rate-display');
+        srDisplay.textContent = balls > 0 ? `${((runs / balls) * 100).toFixed(1)}` : `0.0`;
+    }
+
+    // --- Data Handling ---
+    function getTeamData(teamType) {
+        const container = teamType === 'myTeam' ? myTeamPlayersContainer : opponentTeamPlayersContainer;
+        const nameInput = teamType === 'myTeam' ? document.getElementById('myTeamName') : document.getElementById('opponentTeamName');
+        const teamName = nameInput.value.trim() || (teamType === 'myTeam' ? 'My Team' : 'Opponent Team');
+        
+        let totalRuns = 0, totalBalls = 0;
+        const players = Array.from(container.querySelectorAll('.player-row')).map(row => {
+            const name = row.querySelector('input[type="text"]').value.trim() || 'Player';
+            const runs = parseInt(row.querySelector('input[placeholder="R"]').value) || 0;
+            const balls = parseInt(row.querySelector('input[placeholder="B"]').value) || 0;
+            const dismissal = row.querySelector('.dismissal-select').value;
+            totalRuns += runs;
+            totalBalls += balls;
+            return { name, runs, balls, strikeRate: balls > 0 ? (runs / balls) * 100 : 0, dismissal };
+        });
+        
+        return { name: teamName, players, totalRuns, totalBalls, avgStrikeRate: totalBalls > 0 ? (totalRuns / totalBalls) * 100 : 0 };
+    }
+    
+    function saveMatchData() {
+        if (!validateInputs()) return;
+        localStorage.setItem('cricketMatchData', JSON.stringify({
+            myTeam: getTeamData('myTeam'),
+            opponentTeam: getTeamData('opponentTeam')
+        }));
+        showToast('Match data saved successfully!');
+    }
+
+    function loadMatchData() {
+        const savedData = localStorage.getItem('cricketMatchData');
+        myTeamPlayersContainer.innerHTML = '';
+        opponentTeamPlayersContainer.innerHTML = '';
+        if (savedData) {
+            const matchData = JSON.parse(savedData);
+            document.getElementById('myTeamName').value = matchData.myTeam.name;
+            document.getElementById('opponentTeamName').value = matchData.opponentTeam.name;
+            matchData.myTeam.players.forEach(p => addPlayer('myTeam', p));
+            matchData.opponentTeam.players.forEach(p => addPlayer('opponentTeam', p));
+        } else {
+            for (let i = 0; i < 5; i++) {
+                addPlayer('myTeam');
+                addPlayer('opponentTeam');
+            }
+        }
+    }
+
+    function clearAllData() {
+        if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+            localStorage.removeItem('cricketMatchData');
+            document.getElementById('myTeamName').value = '';
+            document.getElementById('opponentTeamName').value = '';
+            loadMatchData();
+            showToast('All data has been cleared.');
+            showSection('create-match');
+        }
+    }
+    
+    function validateInputs() {
+        const myTeamPlayerCount = myTeamPlayersContainer.children.length;
+        const opponentTeamPlayerCount = opponentTeamPlayersContainer.children.length;
+
+        if (myTeamPlayerCount < 5 || opponentTeamPlayerCount < 5) {
+            showToast('Both teams must have at least 5 players.');
+            return false;
+        }
+        let allValid = true;
+        document.querySelectorAll('.player-row input[type="number"]').forEach(input => {
+            if (parseInt(input.value) < 0) {
+                input.classList.add('border-red-500');
+                allValid = false;
+            } else {
+                input.classList.remove('border-red-500');
+            }
+        });
+        if (!allValid) showToast('Runs and balls cannot be negative.');
+        return allValid;
+    }
+
+    // --- Result Calculation and Display ---
+    function generateResult() {
+        if (!validateInputs()) return;
+        saveMatchData();
+        showToast('Result calculated! Check the "View Result" tab.');
+        showSection('view-prediction');
+    }
+
+    function displayResults() {
+        const savedData = localStorage.getItem('cricketMatchData');
+        const winnerResultDiv = document.getElementById('winnerResult');
+        const predictionErrorDiv = document.getElementById('predictionError');
+
+        if (!savedData) {
+            winnerResultDiv.classList.add('hidden');
+            predictionErrorDiv.classList.remove('hidden');
+            document.getElementById('downloadCsvBtn').classList.add('hidden');
+            return;
+        }
+        
+        winnerResultDiv.classList.remove('hidden');
+        predictionErrorDiv.classList.add('hidden');
+        document.getElementById('downloadCsvBtn').classList.remove('hidden');
+
+        const { myTeam, opponentTeam } = JSON.parse(savedData);
+        populateResultTable('myTeam', myTeam);
+        populateResultTable('opponentTeam', opponentTeam);
+        
+        const winnerText = document.getElementById('winnerText');
+        const winnerReason = document.getElementById('winnerReason');
+        
+        if (myTeam.totalRuns > opponentTeam.totalRuns) {
+            winnerText.textContent = `${myTeam.name} Won!`;
+            winnerReason.textContent = `They won by ${myTeam.totalRuns - opponentTeam.totalRuns} runs.`;
+        } else if (opponentTeam.totalRuns > myTeam.totalRuns) {
+            winnerText.textContent = `${opponentTeam.name} Won!`;
+            winnerReason.textContent = `They won by ${opponentTeam.totalRuns - myTeam.totalRuns} runs.`;
+        } else {
+            winnerText.textContent = `Match Tied!`;
+            winnerReason.textContent = `Both teams scored ${myTeam.totalRuns} runs.`;
+        }
+    }
+
+    function populateResultTable(teamType, teamData) {
+        const tableBody = document.getElementById(`${teamType}ResultBody`);
+        document.getElementById(`${teamType}ResultHeader`).textContent = `${teamData.name} - Scoreboard`;
+        tableBody.innerHTML = '';
+
+        if (teamData.players.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-500">No data.</td></tr>';
+            return;
+        }
+        
+        teamData.players.forEach(p => {
+            const row = tableBody.insertRow();
+            const runsDisplay = p.dismissal === 'Not Out' ? `${p.runs}*` : p.runs;
+            row.innerHTML = `
+                <td class="py-3 px-3 font-medium">${p.name}</td>
+                <td class="py-3 px-3 text-center text-slate-400">${p.dismissal}</td>
+                <td class="py-3 px-3 text-center font-bold text-white">${runsDisplay}</td>
+                <td class="py-3 px-3 text-center text-slate-400">${p.balls}</td>
+                <td class="py-3 px-3 text-center font-semibold text-emerald-400">${p.strikeRate.toFixed(2)}</td>
+            `;
+        });
+        
+        document.getElementById(`${teamType}Totals`).innerHTML = `
+            <span class="text-slate-400">Total: <strong class="text-white">${teamData.totalRuns} / ${teamData.totalBalls}</strong></span><br>
+            <span class="text-slate-400">Avg SR: <strong class="text-emerald-400">${teamData.avgStrikeRate.toFixed(2)}</strong></span>
+        `;
+    }
+
+    function downloadCSV() {
+        const savedData = localStorage.getItem('cricketMatchData');
+        if (!savedData) return;
+        const { myTeam, opponentTeam } = JSON.parse(savedData);
+        let csvContent = "data:text/csv;charset=utf-8,Team,Player,Runs,Balls Faced,Strike Rate,Dismissal\n";
+        const addTeamToCsv = (team) => {
+            team.players.forEach(p => {
+                csvContent += `${team.name.replace(/,/g, '')},${p.name.replace(/,/g, '')},${p.runs},${p.balls},${p.strikeRate.toFixed(2)},${p.dismissal}\n`;
+            });
+             csvContent += `${team.name} Totals,,${team.totalRuns},${team.totalBalls},${team.avgStrikeRate.toFixed(2)}\n\n`;
+        };
+        addTeamToCsv(myTeam);
+        addTeamToCsv(opponentTeam);
+        
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "cricket_match_stats.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadMatchData();
+        document.getElementById('myTeamName').addEventListener('input', (e) => {
+            document.getElementById('myTeamSectionHeader').textContent = (e.target.value.trim() || 'My Team') + ' Roster';
+        });
+        document.getElementById('opponentTeamName').addEventListener('input', (e) => {
+            document.getElementById('opponentTeamSectionHeader').textContent = (e.target.value.trim() || 'Opponent Team') + ' Roster';
+        });
+    });
+
+</script>
+
+</body>
+</html>
